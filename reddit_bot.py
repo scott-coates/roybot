@@ -2,6 +2,7 @@ from re import search
 import praw
 import config
 import time
+import redis
 
 def bot_login():
 	print("Logging in...")
@@ -16,7 +17,7 @@ def bot_login():
 
 	return r
 
-def run_bot(r, subreddit_to_search, search_str):
+def run_bot(r, conn, subreddit_to_search, search_str):
 	print("Searching last 1,000 comments")
 
 	formatted_search_str = search_str.lower()
@@ -24,7 +25,7 @@ def run_bot(r, subreddit_to_search, search_str):
 	for comment in r.subreddit(subreddit_to_search).comments(limit=1000):
 		formatted_body_str = comment.body.lower()
 
-		if formatted_search_str in formatted_body_str and not is_commented_replied_to(comment.id) and comment.author != r.user.me():
+		if formatted_search_str in formatted_body_str and not is_commented_replied_to(conn, comment.id) and comment.author != r.user.me():
 			print(f"String with \"{formatted_search_str}\" found in comment {comment.permalink}.")
 			
 			comment_reply = get_comment_reply()
@@ -32,7 +33,7 @@ def run_bot(r, subreddit_to_search, search_str):
 			
 			print("Replied to comment " + comment.permalink)
 
-			record_commented_replied_to(comment.id)
+			record_commented_replied_to(conn, comment.id)
 
 			# with open ("comments_replied_to.txt", "a") as f:
 			# 	f.write(comment.id + "\n")
@@ -46,15 +47,23 @@ def run_bot(r, subreddit_to_search, search_str):
 	time.sleep(10)
 
 
-def is_commented_replied_to(comment_id):
-	return False
+def is_commented_replied_to(conn, comment_id):
+	ret_val = conn.sismember('comment_replies', comment_id)
+	
+	return ret_val
 
-def record_commented_replied_to(comment_id):
-	return False
+def record_commented_replied_to(conn, comment_id):
+	ret_val = conn.sadd('comment_replies', comment_id)
 
+	return ret_val
 
 def get_comment_reply():
 	return "hi"
+
+def get_connection():
+	r = redis.from_url(config.redis_url)
+
+	return r
 
 # def get_saved_comments():
 # 	if not os.path.isfile("comments_replied_to.txt"):
@@ -67,7 +76,7 @@ def get_comment_reply():
 
 # 	return comments_replied_to
 
-
+conn = get_connection()
 r = bot_login()
 subreddit_to_search = config.subreddit
 search_str = config.search_term
@@ -76,5 +85,5 @@ search_str = config.search_term
 
 while True:
 	# run_bot(r, comments_replied_to)
-	run_bot(r, subreddit_to_search, search_str)
+	run_bot(r, conn, subreddit_to_search, search_str)
 
