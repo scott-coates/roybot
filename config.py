@@ -11,6 +11,7 @@ except:
     pass
 
 subreddit = os.environ['SUBREDDIT']
+search_term = os.environ['SEARCH_TERM']
 username = os.environ['USERNAME']
 password = os.environ['PASSWORD']
 client_id = os.environ['CLIENT_ID']
