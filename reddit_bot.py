@@ -3,6 +3,9 @@ import praw
 import config
 import time
 import redis
+import csv
+import urllib.request
+import random
 
 def bot_login():
 	print("Logging in...")
@@ -17,7 +20,7 @@ def bot_login():
 
 	return r
 
-def run_bot(r, conn, subreddit_to_search, search_str):
+def run_bot(r, conn, subreddit_to_search, search_str, replies):
 	print("Searching last 1,000 comments")
 
 	formatted_search_str = search_str.lower()
@@ -28,7 +31,7 @@ def run_bot(r, conn, subreddit_to_search, search_str):
 		if formatted_search_str in formatted_body_str and not is_commented_replied_to(conn, comment.id) and comment.author != r.user.me():
 			print(f"String with \"{formatted_search_str}\" found in comment {comment.permalink}.")
 			
-			comment_reply = get_comment_reply()
+			comment_reply = get_comment_reply(replies)
 			comment.reply(comment_reply)
 			
 			print("Replied to comment " + comment.permalink)
@@ -49,7 +52,7 @@ def run_bot(r, conn, subreddit_to_search, search_str):
 
 def is_commented_replied_to(conn, comment_id):
 	ret_val = conn.sismember('comment_replies', comment_id)
-	
+
 	return ret_val
 
 def record_commented_replied_to(conn, comment_id):
@@ -57,13 +60,28 @@ def record_commented_replied_to(conn, comment_id):
 
 	return ret_val
 
-def get_comment_reply():
-	return "hi"
+def get_comment_reply(replies):
+	ret_val = random.choice(replies)[0]
+
+	return ret_val
 
 def get_connection():
 	r = redis.from_url(config.redis_url)
 
 	return r
+
+def get_replies():
+	# get csv in py3 https://stackoverflow.com/questions/16283799/how-to-read-a-csv-file-from-a-url-with-python/62614979#62614979
+	url = config.spreadsheet_url
+	response = urllib.request.urlopen(url)
+	lines = [l.decode('utf-8') for l in response.readlines()]
+	cr = csv.reader(lines)
+
+	# skip first line as header
+	next(cr)
+	ret_val = list(cr)
+
+	return ret_val
 
 # def get_saved_comments():
 # 	if not os.path.isfile("comments_replied_to.txt"):
@@ -80,10 +98,11 @@ conn = get_connection()
 r = bot_login()
 subreddit_to_search = config.subreddit
 search_str = config.search_term
+replies = get_replies()
 #comments_replied_to = get_saved_comments()
 # print(comments_replied_to)
 
 while True:
 	# run_bot(r, comments_replied_to)
-	run_bot(r, conn, subreddit_to_search, search_str)
+	run_bot(r, conn, subreddit_to_search, search_str, replies)
 
