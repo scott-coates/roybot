@@ -25,9 +25,12 @@ def run_bot(r, conn, subreddit_to_search, search_str, replies):
 
 	formatted_search_str = search_str.lower()
 	
-	for comment in r.subreddit(subreddit_to_search).comments(limit=1000):
+	searched_comments = r.subreddit(subreddit_to_search).comments(limit=1000)
+
+	for comment in searched_comments:
 		formatted_body_str = comment.body.lower()
 
+		# print(f'comment {comment}')
 		if formatted_search_str in formatted_body_str and not is_commented_replied_to(conn, comment.id) and comment.author != r.user.me():
 			print(f"String with \"{formatted_search_str}\" found in comment {comment.permalink}.")
 			
