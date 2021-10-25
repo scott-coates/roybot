@@ -1,3 +1,4 @@
+import sys
 import re
 import praw
 import config
@@ -48,11 +49,6 @@ def run_bot(r, conn, subreddit_to_search, search_str, replies):
 
 	# print(comments_replied_to)
 
-	print("Sleeping for 10 seconds...")
-	#Sleep for 10 seconds...		
-	time.sleep(10)
-
-
 def is_commented_replied_to(conn, comment_id):
 	ret_val = conn.sismember('comment_replies', comment_id)
 
@@ -99,6 +95,15 @@ def get_replies():
 
 	return ret_val
 
+
+def get_should_loop():
+	try:
+		ret_val = sys.argv[1] == '--loop'
+	except:
+		ret_val = False
+
+	return ret_val
+
 # def get_saved_comments():
 # 	if not os.path.isfile("comments_replied_to.txt"):
 # 		comments_replied_to = []
@@ -115,10 +120,18 @@ r = bot_login()
 subreddit_to_search = config.subreddit
 search_str = config.search_term
 replies = get_replies()
+should_loop = get_should_loop()
 #comments_replied_to = get_saved_comments()
 # print(comments_replied_to)
 
 while True:
 	# run_bot(r, comments_replied_to)
 	run_bot(r, conn, subreddit_to_search, search_str, replies)
+
+	if should_loop:
+		print("Sleeping for 10 seconds...")
+		#Sleep for 10 seconds...		
+		time.sleep(10)
+	else:
+		break
 
