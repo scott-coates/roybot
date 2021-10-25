@@ -1,4 +1,4 @@
-from re import search
+import re
 import praw
 import config
 import time
@@ -28,7 +28,7 @@ def run_bot(r, conn, subreddit_to_search, search_str, replies):
 	searched_comments = r.subreddit(subreddit_to_search).comments(limit=1000)
 
 	for comment in searched_comments:
-		formatted_body_str = comment.body.lower()
+		formatted_body_str = re.sub(r'[\W|-]+', '', comment.body.lower())
 
 		# print(f'comment {comment}')
 		if formatted_search_str in formatted_body_str and not is_commented_replied_to(conn, comment.id) and comment.author != r.user.me():
