@@ -32,7 +32,20 @@ def run_bot(r, conn, subreddit_to_search, search_str, replies):
 		formatted_body_str = re.sub(r'[\W|-]+', '', comment.body.lower())
 
 		# print(f'comment {comment}')
-		if formatted_search_str in formatted_body_str and not is_commented_replied_to(conn, comment.id) and comment.author != r.user.me():
+		callout, parent_is_me = False, False
+		
+		callout = formatted_search_str in formatted_body_str
+
+		if not callout:
+			comment_parent = comment.parent()
+			parent_is_type_comment = isinstance(comment_parent, praw.models.reddit.comment.Comment)
+
+			if parent_is_type_comment:
+				parent_is_me = comment_parent.author == r.user.me()
+		
+		should_reply = callout or parent_is_me
+
+		if should_reply and not is_commented_replied_to(conn, comment.id) and comment.author != r.user.me():
 			print(f"String with \"{formatted_search_str}\" found in comment {comment.permalink}.")
 			
 			comment_reply = get_comment_reply(replies)
