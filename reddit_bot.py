@@ -62,18 +62,20 @@ def record_commented_replied_to(conn, comment_id):
 def get_comment_reply(replies):
 	random_choice = random.choice(replies)[0]
 
-	footers = [
-		# "I am a bot! Mention my name `RoyBot` whenever you need non-biased, third party arbitration to weigh in.",
-		# "I'm RoyBot! Mention my name `RoyBot` whenever you want a quote from the show. Now fuck off.",
-		# "This is RoyBot! Mention my name `RoyBot` whenever you attempt a hostile takeover.",
-		# "Hello! I am RoyBot! Mention my name `RoyBot` whenever you are the kin of neglectful billionaires and need a hug.",
-		"I'm a bot! Mention my name `RoyBot` whenever you want a quote from the show. Now fuck off.",
-	]
+	# footers = [
+	# 	# "I am a bot! Mention my name `RoyBot` whenever you need non-biased, third party arbitration to weigh in.",
+	# 	# "I'm RoyBot! Mention my name `RoyBot` whenever you want a quote from the show. Now fuck off.",
+	# 	# "This is RoyBot! Mention my name `RoyBot` whenever you attempt a hostile takeover.",
+	# 	# "Hello! I am RoyBot! Mention my name `RoyBot` whenever you are the kin of neglectful billionaires and need a hug.",
+	# 	"I'm a bot! Mention my name `RoyBot` whenever you want a quote from the show. Now fuck off.",
+	# ]
 
-	# markdown - small font size
-	footer = "^" + random.choice(footers).replace(' ', ' ^')
+	# # markdown - small font size
+	# footer = "^" + random.choice(footers).replace(' ', ' ^')
 
-	ret_val = f"{random_choice}\n\n{footer}"
+	# ret_val = f"{random_choice}\n\n{footer}"
+
+	ret_val = random_choice
 
 	return ret_val
 
